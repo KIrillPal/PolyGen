@@ -146,10 +146,13 @@ void DataBase::focusAtHead(std::list<Library>::iterator it)
         (*selectedHead).head->isPressed = false;
         (*selectedHead).head->update();
     }
-    (*it).head->isPressed = true;
-    (*it).head->update();
-    selectedHead = it;
-    dbLb->mainText.setString((*it).name);
+	if (it != dataBase.end())
+	{
+		(*it).head->isPressed = true;
+		(*it).head->update();
+		selectedHead = it;
+		dbLb->mainText.setString((*it).name);
+	}
 }
 
 void DataBase::focusAtPoly(std::list<Library>::iterator cont, std::list<Polynomial>::iterator it)
@@ -706,10 +709,13 @@ void DataBase::checkReleased(int X, int Y)
             }
         }
         if (dbDelete->checkReleased(dbScroll->control, dbScroll->mindPos, X, Y)) {
-            if (selectedType == 1)
-                openQuestion("Are you sure to delete     this library?", deleteFocused);
-            else if (selectedType == 2)
-                openQuestion("Are you sure to delete     this item?", deletePoly);
+			if (selectedHead != dataBase.end())
+			{
+				if (selectedType == 1)
+					openQuestion("Are you sure to delete     this library?", deleteFocused);
+				else if (selectedType == 2)
+					openQuestion("Are you sure to delete     this item?", deletePoly);
+			}
         }
         if (dbUp->checkReleased(dbScroll->control, dbScroll->mindPos, X, Y)) {
             moveFocusedUp();
@@ -718,7 +724,10 @@ void DataBase::checkReleased(int X, int Y)
             moveFocusedDown();
         }
         if (dbSettings->checkReleased(dbScroll->control, dbScroll->mindPos, X, Y)) {
-            openSettings("Library name:", "Absolute path(txt format):", updateFocused);
+			if (selectedHead != dataBase.end())
+			{
+				openSettings("Library name:", "Absolute path(txt format):", updateFocused);
+			}
         }
         if (dbClose->checkReleased(dbScroll->control, dbScroll->mindPos, X, Y))
         {
@@ -1189,7 +1198,8 @@ void deleteFocused(DataBase * db, bool answer)
         else if (itb == db->dataBase.begin())
             db->selectedHead = db->dataBase.end();
         else nxt = itb, db->focusAtHead(--nxt);
-        db->dataBase.erase(itb);
+		if (itb != db->dataBase.end())
+			db->dataBase.erase(itb);
         db->savePaths();
         if (db->dataBase.empty())
         {
